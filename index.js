@@ -1,3 +1,12 @@
+const displayController = (() => {
+    const renderMessage = (message) => {
+        document.querySelector("#message").innerHTML = message;
+    }
+    return {
+        renderMessage,
+    }
+})();
+
 const Gameboard = (() => {
     let gameboard = ["", "", "", "", "", "", "", "", ""];
 
@@ -43,26 +52,35 @@ const Game = (() => {
         players = [
             createPlayer(document.querySelector("#player-one").value, "X"),
             createPlayer(document.querySelector("#player-two").value, "O")
-        ]
+        ];
         currentPlayerIndex = 0;
         gameOver = false;
         Gameboard.render();
+        document.getElementById("message").innerHTML = "";
+        document.querySelectorAll(".square").forEach((square) => {
+            square.addEventListener("click", handleClick);
+        });
     }
 
     const handleClick = (event) => {
+        if (gameOver) {
+            return;
+        }
+
         let index = parseInt(event.target.id.split("-")[1]);
 
-        if (Gameboard.getGameboard()[index] !== "")
-            return;
+        if (Gameboard.getGameboard()[index] !== "") return;
+
         Gameboard.update(index, players[currentPlayerIndex].mark);
-        currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
 
         if (checkForWin(Gameboard.getGameboard(), players[currentPlayerIndex.mark])) {
             gameOver = true;
-            alert(`${players[currentPlayerIndex].name} won!`);
+            displayController.renderMessage(`${players[currentPlayerIndex].name} wins`)
         } else if (checkForTie(Gameboard.getGameboard())) {
             gameOver = true;
-            alert(`It's a tie!`);
+            displayController.renderMessage(`$It's a tie!`)
+        } else {
+            currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
         }
     }
 
@@ -71,6 +89,8 @@ const Game = (() => {
             Gameboard.update(i, "");
         }
         Gameboard.render();
+        gameOver = false;
+        document.querySelector("#message").innerHTML = "";
     }
 
     return {
@@ -98,6 +118,10 @@ function checkForWin(board) {
         }
     }
     return false;
+}
+
+function checkForTie(board) {
+    return board.every(cell => cell !== "")
 }
 
 const restartBtn = document.querySelector("#restart-button");
