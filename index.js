@@ -4,17 +4,26 @@ const Gameboard = (() => {
     const render = () => {
         let board = "";
         gameboard.forEach((square, index) => {
-            board += `<div class=square id=square-${index}>${square}</div>`
+            board += `<div class=square id="square-${index}">${square}</div>`
         })
         document.querySelector("#gameboard").innerHTML = board;
         const squares = document.querySelectorAll(".square");
         squares.forEach((square) => {
-            square.addEventListener("click", handleClick);
+            square.addEventListener("click", Game.handleClick);
         })
     }
 
+    const update = (index, value) => {
+        gameboard[index] = value;
+        render();
+    }
+
+    const getGameboard = () => gameboard;
+
     return {
         render,
+        update,
+        getGameboard
     }
 })();
 
@@ -39,10 +48,33 @@ const Game = (() => {
         gameOver = false;
         Gameboard.render();
     }
+
+    const handleClick = (event) => {
+        let index = parseInt(event.target.id.split("-")[1]);
+
+        if (Gameboard.getGameboard()[index] !== "")
+            return;
+        Gameboard.update(index, players[currentPlayerIndex].mark);
+        currentPlayerIndex = currentPlayerIndex === 0 ? 1 : 0;
+    }
+    const restart = () => {
+        for (let i = 0; i < 9; i++) {
+            Gameboard.update(i, "");
+        }
+        Gameboard.render();
+    }
+
     return {
         start,
+        restart,
+        handleClick,
     }
 })();
+
+const restartBtn = document.querySelector("#restart-button");
+restartBtn.addEventListener("click", () => {
+    Game.restart();
+})
 
 const startBtn = document.querySelector("#start-button")
 startBtn.addEventListener("click", ()=> {
